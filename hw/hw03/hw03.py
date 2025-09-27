@@ -134,23 +134,14 @@ def count_dollars(total):
     True
     """
     "*** YOUR CODE HERE ***"
-    def count_way(amount,denominations):
-        if amount == 0:
+    def count_way(bill, total):
+        if total == 0:
             return 1
-        if amount < 0 or not denominations:
+        if total < 0 or bill is None:
             return 0
+        return count_way(bill, total - bill) + count_way(next_smaller_dollar(bill), total)
+    return count_way(100, total)
 
-        first_denom = denominations[0]
-        rest_denom = denominations[1:]
-
-        use_first = count_way(amount - first_denom, denominations)
-        skip_first = count_way(amount, rest_denom)
-
-        return use_first + skip_first
-
-    denominations = [1, 5, 10, 20, 50, 100]
-    valid_denoms = [d for d in denominations if d <= total]
-    return count_way(total, valid_denoms)
 
 def next_larger_dollar(bill):
     """Returns the next larger bill in order."""
@@ -186,6 +177,13 @@ def count_dollars_upward(total):
     True
     """
     "*** YOUR CODE HERE ***"
+    def count_using(bill, total):
+        if total == 0:
+            return 1
+        if total < 0 or bill is None:
+            return 0
+        return count_using(bill, total - bill) + count_using(next_larger_dollar(bill), total)
+    return count_using(1, total)
 
 
 def print_move(origin, destination):
@@ -221,6 +219,14 @@ def move_stack(n, start, end):
     """
     assert 1 <= start <= 3 and 1 <= end <= 3 and start != end, "Bad start/end"
     "*** YOUR CODE HERE ***"
+    if n == 1:
+        print_move(start, end)
+    else:
+        spare = 6 - start - end
+        move_stack(n-1, start, spare)
+        move_stack(1, start, end)
+        move_stack(n-1, spare, end)
+
 
 
 from operator import sub, mul
@@ -236,5 +242,6 @@ def make_anonymous_factorial():
     ...     ['Assign', 'AnnAssign', 'AugAssign', 'NamedExpr', 'FunctionDef', 'Recursion'])
     True
     """
-    return 'YOUR_EXPRESSION_HERE'
-
+    return (lambda f: (lambda n: f(f,n)))(
+        lambda f, n: 1 if n == 0 else n * f(f, n-1)
+    )
